@@ -1,0 +1,88 @@
+Sub CalcularHores()
+
+'   Eliminem les primeres 3 files i la imatge
+    Call Eliminar_files_inicials_informe_JIRA
+
+    Dim ws As Worksheet
+    Set ws = ActiveSheet
+    
+    Dim lastRowNumber As Integer
+        
+'   Busquem i inicialitzem l'última fila
+                       
+    lastRowNumber = cerca_ultima_fila(ws)
+            
+    'MsgBox ("Last row: " & lastRowNumber)
+            
+    If (lastRowNumber <> -1) Then
+                
+        Call cerca_columna_i_calcula_hores(ws, "Time Spent", lastRowNumber)
+        
+        Call cerca_columna_i_calcula_hores(ws, "Original Estimate", lastRowNumber)
+        
+        Call cerca_columna_i_calcula_hores(ws, "Remaining Estimate", lastRowNumber)
+    
+        Call elimina_fila(ws, lastRowNumber + 1)
+        
+    End If
+    
+End Sub
+
+Sub Eliminar_files_inicials_informe_JIRA()
+
+' Eliminar_files_informe_JIRA Macro
+' Comprova si existeix la imatge. Si existeix assumeix que encara no s''han eliminat les files
+' i elimina les 3 primeres files de l'extracció JIRA-MIND i el logo de INDRA i MIND
+    
+    Dim myImage As Shape
+    
+    For Each myImage In ActiveSheet.Shapes
+        If Left(myImage.Name, 3) = "Pic" Then
+            myImage.Delete
+            Rows("1:3").Select
+            Selection.Delete Shift:=xlUp
+            Range("A1").Select
+        End If
+    Next myImage
+    
+End Sub
+
+Function cerca_ultima_fila(ws As Worksheet) As Integer
+    Dim FoundCell As Range
+    
+    Set FoundCell = ws.Rows.Find(What:="Generated", After:=ActiveCell, LookIn:=xlFormulas _
+    , LookAt:=xlPart, SearchOrder:=xlByRows, SearchDirection:=xlNext, _
+    MatchCase:=False, SearchFormat:=False)
+    
+    If (Not FoundCell Is Nothing) Then
+        cerca_ultima_fila = FoundCell.row - 1
+    Else
+        cerca_ultima_fila = -1
+    End If
+End Function
+
+Sub cerca_columna_i_calcula_hores(ws As Worksheet, titolCapcalera As String, lastRowNumber As Integer)
+    Dim headerColumnToChange As Range
+    Dim TotalTimeSpentCell As Range
+
+'   Busquem la columna que hem de passar a hores
+    Set headerColumnToChange = ws.Rows.Find(What:=titolCapcalera, After:=ActiveCell, LookIn:=xlFormulas _
+    , LookAt:=xlPart, SearchOrder:=xlByRows, SearchDirection:=xlNext, _
+    MatchCase:=True, SearchFormat:=False)
+                      
+    If (Not headerColumnToChange Is Nothing) Then
+'       Pop up / alert amb dades de debug. Ara és innecessari. Comentem.
+'       MsgBox ("headerColumnToChange: " & headerColumnToChange.row & ":" & headerColumnToChange.Column)
+        For Counter = (headerColumnToChange.row + 1) To lastRowNumber Step 1
+            ws.Cells(Counter, headerColumnToChange.Column) = ws.Cells(Counter, headerColumnToChange.Column) / 3600
+        Next Counter
+    End If
+
+End Sub
+
+Sub elimina_fila(ws As Worksheet, rowToDelete As Integer)
+    ws.Rows(rowToDelete).Delete
+End Sub
+
+
+
