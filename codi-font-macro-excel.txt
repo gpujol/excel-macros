@@ -16,9 +16,15 @@ Sub CalcularHores()
             
     If (lastRowNumber <> -1) Then
                 
+        Call cerca_columna_i_calcula_hores(ws, ChrW(&H3A3) & " Time Spent", lastRowNumber)
+        
         Call cerca_columna_i_calcula_hores(ws, "Time Spent", lastRowNumber)
         
+        Call cerca_columna_i_calcula_hores(ws, ChrW(&H3A3) & " Original Estimate", lastRowNumber)
+        
         Call cerca_columna_i_calcula_hores(ws, "Original Estimate", lastRowNumber)
+        
+        Call cerca_columna_i_calcula_hores(ws, ChrW(&H3A3) & " Remaining Estimate", lastRowNumber)
         
         Call cerca_columna_i_calcula_hores(ws, "Remaining Estimate", lastRowNumber)
     
@@ -55,7 +61,7 @@ Function cerca_ultima_fila(ws As Worksheet) As Integer
     MatchCase:=False, SearchFormat:=False)
     
     If (Not FoundCell Is Nothing) Then
-        cerca_ultima_fila = FoundCell.row - 1
+        cerca_ultima_fila = FoundCell.Row - 1
     Else
         cerca_ultima_fila = -1
     End If
@@ -67,13 +73,13 @@ Sub cerca_columna_i_calcula_hores(ws As Worksheet, titolCapcalera As String, las
 
 '   Busquem la columna que hem de passar a hores
     Set headerColumnToChange = ws.Rows.Find(What:=titolCapcalera, After:=ActiveCell, LookIn:=xlFormulas _
-    , LookAt:=xlPart, SearchOrder:=xlByRows, SearchDirection:=xlNext, _
+    , LookAt:=xlWhole, SearchOrder:=xlByRows, SearchDirection:=xlNext, _
     MatchCase:=True, SearchFormat:=False)
                       
     If (Not headerColumnToChange Is Nothing) Then
 '       Pop up / alert amb dades de debug. Ara és innecessari. Comentem.
 '       MsgBox ("headerColumnToChange: " & headerColumnToChange.row & ":" & headerColumnToChange.Column)
-        For Counter = (headerColumnToChange.row + 1) To lastRowNumber Step 1
+        For Counter = (headerColumnToChange.Row + 1) To lastRowNumber Step 1
             ws.Cells(Counter, headerColumnToChange.Column) = ws.Cells(Counter, headerColumnToChange.Column) / 3600
         Next Counter
     End If
@@ -83,6 +89,3 @@ End Sub
 Sub elimina_fila(ws As Worksheet, rowToDelete As Integer)
     ws.Rows(rowToDelete).Delete
 End Sub
-
-
-
